@@ -4,3 +4,15 @@ data/*.parquet
 data/*.zip
 data/raw/**
 !data/.gitkeep
+
+# large local data
+data/*.csv
+data/*.parquet
+data/*.zip
+data/raw/**
+
+# per-user config (not checked in)
+config.local.yaml
+
+# dotenv (optional)
+.env

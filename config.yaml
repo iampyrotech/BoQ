@@ -1,1 +1,2 @@
-data_root: "$DATA_ROOT"
+# Team-wide defaults; DO NOT put machine paths here.
+data_root: "./data"   # fallback if no per-user override

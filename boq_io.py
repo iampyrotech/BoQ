@@ -1,32 +1,21 @@
 import os
-import re
-import pandas as pd
 import yaml
+import pandas as pd
 
-_PTN = re.compile(r"\$\{([^}:]+)(?::-(.*))?\}")  # matches ${VAR} or ${VAR:-default}
-
-def _expand_with_default(s: str) -> str:
-    """
-    Expand ${VAR} or ${VAR:-default}. If VAR unset/empty, use default.
-    Falls back to os.path.expandvars for $VAR and ${VAR}.
-    """
-    def repl(m):
-        var = m.group(1)
-        default = m.group(2)
-        val = os.getenv(var)
-        if val is None or val == "":
-            return default if default is not None else ""
-        return val
-    # First handle ${VAR:-default}
-    s2 = _PTN.sub(repl, s)
-    # Then handle plain $VAR / ${VAR}
-    return os.path.expandvars(s2)
-
-def load_config(path="config.yaml"):
+def _read_yaml(path):
+    if not os.path.exists(path):
+        return {}
     with open(path, "r") as f:
-        cfg = yaml.safe_load(f) or {}
-    raw = cfg.get("data_root", "./data")
-    data_root = _expand_with_default(str(raw))
+        return yaml.safe_load(f) or {}
+
+def load_config():
+    # 1) per-user override (gitignored)
+    user_cfg = _read_yaml("config.local.yaml")
+    # 2) team defaults (committed)
+    base_cfg = _read_yaml("config.yaml")
+    # merge: user overrides base
+    cfg = {**base_cfg, **user_cfg}
+    data_root = cfg.get("data_root", "./data")
     return {"data_root": data_root}
 
 def path_in_data(*parts, cfg=None):
@@ -34,8 +23,8 @@ def path_in_data(*parts, cfg=None):
         cfg = load_config()
     return os.path.join(cfg["data_root"], *parts)
 
-def load_csv(filename, cfg=None, **read_csv_kwargs):
+def load_csv(filename, cfg=None, **kwargs):
     if cfg is None:
         cfg = load_config()
-    full_path = os.path.join(cfg["data_root"], filename)
-    return pd.read_csv(full_path, **read_csv_kwargs)
+    full = os.path.join(cfg["data_root"], filename)
+    return pd.read_csv(full, **kwargs)

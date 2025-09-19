@@ -1,0 +1,2 @@
+# Where datasets live. Uses DATA_ROOT if set, otherwise ./data
+data_root: "${DATA_ROOT:-./data}"

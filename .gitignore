@@ -1,0 +1,6 @@
+# large data stays out of git
+data/*.csv
+data/*.parquet
+data/*.zip
+data/raw/**
+!data/.gitkeep

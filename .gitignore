@@ -16,3 +16,4 @@ config.local.yaml
 
 # dotenv (optional)
 .env
+.venv/
